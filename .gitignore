@@ -1,0 +1,7 @@
+**/HELP.md
+**/target/
+.idea
+**/.idea
+**/*.iws
+**/*.iml
+**/.mvn

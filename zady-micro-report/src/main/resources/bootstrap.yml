@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: service-report
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        file-extension: yml
+    sentinel:
+      eager: true
+      transport:
+        dashboard: 127.0.0.1:8080
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            dataId: ${spring.application.name}-degrade-rules
+            data-type: json
+            rule-type: degrade
+  profiles:
+    active: dev
