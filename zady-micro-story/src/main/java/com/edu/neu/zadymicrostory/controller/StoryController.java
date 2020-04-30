@@ -211,9 +211,4 @@ public class StoryController {
 
     }
 
-    @GetMapping("/message/{storyId}")
-    public String message(@PathVariable Integer storyId){
-        return "一条消息" + storyId;
-    }
-
 }

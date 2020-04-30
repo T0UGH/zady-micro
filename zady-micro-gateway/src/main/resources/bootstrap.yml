@@ -16,10 +16,14 @@ spring:
       - id: service-user
         uri: lb://service-user
         predicates:
-        - Path=/user/**,/role/**
+        - Path=/user/**,/role/**,/project/**,/invite/**
       - id: sevice-report
         uri: lb://service-report
         predicates:
-        - Path=/report/**
+        - Path=/bornout/**,/dashBoard/**/
+      - id: sevice-story
+        uri: lb://service-story
+        predicates:
+          - Path=/backlog/**,/backlogs/**/,/currentBacklog/**/,/bug/**/,/bugs/**/,/sprint/**/,/sprints/**/,/currentSprint/**/,/story/**/,/stories/**/
   profiles:
     active: dev
