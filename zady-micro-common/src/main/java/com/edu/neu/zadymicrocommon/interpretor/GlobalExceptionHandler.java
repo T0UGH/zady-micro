@@ -1,9 +1,6 @@
 package com.edu.neu.zadymicrocommon.interpretor;
 
-import com.edu.neu.zadymicrocommon.exception.BadDataException;
-import com.edu.neu.zadymicrocommon.exception.DefaultException;
-import com.edu.neu.zadymicrocommon.exception.NoAuthException;
-import com.edu.neu.zadymicrocommon.exception.NotFoundException;
+import com.edu.neu.zadymicrocommon.exception.*;
 import com.edu.neu.zadymicrocommon.pojo.DTO;
 import com.edu.neu.zadymicrocommon.util.DTOFactory;
 import org.slf4j.Logger;
@@ -97,6 +94,15 @@ public class GlobalExceptionHandler {
             msg = "其他错误";
         }
         return DTOFactory.unKnownErrorDTO(msg);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler(DegradeException.class)
+    public DTO handleDegradeException(Exception e) {
+        String msg = e.getMessage();
+        logger.error(msg, e);
+        return DTOFactory.degradeDTO(msg);
     }
 
 

@@ -32,6 +32,13 @@ public class DTOFactory {
         return dto;
     }
 
+    public static DTO degradeDTO(String msg){
+        DTO dto = new DTO();
+        dto.setCode(HttpStatus.SERVICE_UNAVAILABLE.value());
+        dto.setMsg(msg);
+        return dto;
+    }
+
     public static DTO unauthorizedDTO(String msg){
         DTO dto = new DTO();
         dto.setCode(HttpStatus.UNAUTHORIZED.value());

@@ -21,6 +21,14 @@ public class FeignClientDecoder implements Decoder {
             throw new RuntimeException("发生了异常");
         }
 
+        if(type.getTypeName().equals("java.lang.Boolean")){
+            return jsonObject.getBoolean("body");
+        }
+
+        if(type.getTypeName().equals("java.lang.String")){
+            return jsonObject.getString("body");
+        }
+
         if(type.getTypeName().equals("java.lang.Integer")){
             return jsonObject.getInteger("body");
         }
