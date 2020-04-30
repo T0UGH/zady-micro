@@ -3,9 +3,9 @@ package com.edu.neu.zadymicrouser.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edu.neu.zadymicrouser.mapper.UserMapper;
-import com.edu.neu.zadymicrouser.pojo.User;
+import com.edu.neu.zadymicrocommon.pojo.User;
 import com.edu.neu.zadymicrouser.service.UserService;
-import com.edu.neu.zadymicrouser.util.Encoder;
+import com.edu.neu.zadymicrocommon.util.Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,7 +1,7 @@
 package com.edu.neu.zadymicrouser.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.edu.neu.zadymicrouser.pojo.User;
+import com.edu.neu.zadymicrocommon.pojo.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
 

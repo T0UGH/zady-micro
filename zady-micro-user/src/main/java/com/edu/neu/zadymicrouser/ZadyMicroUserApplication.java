@@ -1,5 +1,7 @@
 package com.edu.neu.zadymicrouser;
 
+import com.edu.neu.zadymicrocommon.pojo.DTO;
+import com.edu.neu.zadymicrocommon.util.DTOFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -8,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages="com.edu.neu")
 @EnableDiscoveryClient
 public class ZadyMicroUserApplication {
 
@@ -21,7 +23,7 @@ public class ZadyMicroUserApplication {
         @RequestMapping(value = "user/echo/{string}", method = RequestMethod.GET)
         public String echo(@PathVariable String string) throws InterruptedException {
             Thread.sleep(20);
-            return "Hello Nacos Discovery " + string;
+            return"Hello Nacos Discovery ";
         }
 
         @RequestMapping(value = "role/echo/{string}", method = RequestMethod.GET)

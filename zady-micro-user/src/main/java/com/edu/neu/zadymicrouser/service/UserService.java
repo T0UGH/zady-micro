@@ -1,6 +1,6 @@
 package com.edu.neu.zadymicrouser.service;
 
-import com.edu.neu.zadymicrouser.pojo.User;
+import com.edu.neu.zadymicrocommon.pojo.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
