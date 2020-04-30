@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableDiscoveryClient
 @EnableFeignClients
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages={"com.edu.neu"})
 public class ZadyMicroReportApplication {
 
     public static void main(String[] args) {

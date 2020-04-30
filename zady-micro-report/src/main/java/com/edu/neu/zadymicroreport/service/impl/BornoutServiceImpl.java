@@ -1,8 +1,8 @@
 package com.edu.neu.zadymicroreport.service.impl;
 
 import com.edu.neu.zadymicroreport.mapper.BornoutMapper;
-import com.edu.neu.zadymicroreport.pojo.Bornout;
-import com.edu.neu.zadymicroreport.pojo.User;
+import com.edu.neu.zadymicrocommon.pojo.Bornout;
+import com.edu.neu.zadymicrocommon.pojo.User;
 import com.edu.neu.zadymicroreport.service.BornoutService;
 import com.edu.neu.zadymicroreport.service.UserService;
 import io.seata.spring.annotation.GlobalTransactional;
