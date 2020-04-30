@@ -4,6 +4,7 @@ package com.edu.neu.zadymicrouser.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edu.neu.zadymicrouser.mapper.UserMapper;
 import com.edu.neu.zadymicrocommon.pojo.User;
+import com.edu.neu.zadymicrouser.service.RoleService;
 import com.edu.neu.zadymicrouser.service.UserService;
 import com.edu.neu.zadymicrocommon.util.Encoder;
 import org.slf4j.Logger;
@@ -27,6 +28,60 @@ public class UserServiceImpl implements UserService {
     @Resource
     UserMapper userMapper;
 
+    @Resource
+    RoleService roleService;
+
+    @Override
+    public User selectById(Integer id) {
+        return userMapper.selectById(id);
+    }
+
+    @Override
+    public User selectByEmail(String email) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public List<User> selectByQueryStr(String queryStr) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(User::getEmail, queryStr).or().like(User::getName, queryStr);
+        return userMapper.selectList(queryWrapper);
+    }
+
+    public Boolean existById(Integer id){
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.select(User::getUserId).eq(User::getUserId, id);
+        return userMapper.selectOne(lambdaQueryWrapper) != null;
+    }
+
+    @Override
+    public Integer updateDefaultProjectIdToNull(Integer id) {
+        return userMapper.updateDefaultProjectIdToNull(id);
+    }
+
+    @Override
+    public List<User> selectForInviteByQueryStr(String queryStr, Integer projectId) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(User::getEmail, queryStr).or().like(User::getName, queryStr);
+        List<User> userList = userMapper.selectList(queryWrapper);
+        //使用迭代器的删除方法删除
+        userList.removeIf(user -> roleService.existByPIdAndUId(projectId, user.getUserId()));
+        return userList;
+    }
+
+    @Override
+    public Integer update(User user) {
+        logger.debug("Updating user: " + user.getEmail());
+        String password = user.getPassword();
+
+        if(password != null && !password.equals("")){
+            user.setPassword(Encoder.string2Sha1(password));
+        }
+
+        return userMapper.updateById(user);
+    }
 
     @Override
     public Integer register(User user) {
@@ -43,6 +98,14 @@ public class UserServiceImpl implements UserService {
         }
 
         return userMapper.insert(user);
+    }
+
+    @Override
+    public Boolean existByEmail(String email) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
+        User user =  userMapper.selectOne(queryWrapper);
+        return user != null && user.getUserId() != null && user.getEmail() != null;
     }
 
 }

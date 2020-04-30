@@ -1,7 +1,6 @@
 package com.edu.neu.zadymicrouser.controller;
 
 import com.edu.neu.zadymicrocommon.pojo.User;
-import com.edu.neu.zadymicrouser.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
