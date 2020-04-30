@@ -1,54 +1,59 @@
 package com.edu.neu.zadymicroreport.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.edu.neu.zadymicroreport.mapper.BornoutMapper;
 import com.edu.neu.zadymicrocommon.pojo.Bornout;
-import com.edu.neu.zadymicrocommon.pojo.User;
 import com.edu.neu.zadymicroreport.service.BornoutService;
-import com.edu.neu.zadymicroreport.service.UserService;
-import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 @Service
+@Transactional
 public class BornoutServiceImpl implements BornoutService {
-
-    @Resource
-    UserService userService;
 
     @Resource
     BornoutMapper bornoutMapper;
 
-    @Transactional
-    @GlobalTransactional
     @Override
-    public Integer testCommit() {
-        User user = new User();
-        user.setEmail("lwx@neu.com");
-        user.setName("lwx");
-        user.setPassword("Neusoft123");
-        int rv = userService.register(user);
-        Bornout bornout = new Bornout();
-        bornout.setBornoutId(1);
-        bornout.setFinishedStoryNum(1);
-        bornoutMapper.updateById(bornout);
-        return rv;
+    public List<Bornout> selectBySprint(Integer sprintId) {
+
+        LambdaQueryWrapper<Bornout> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Bornout::getSprintId, sprintId);
+
+        return bornoutMapper.selectList(lambdaQueryWrapper);
     }
 
-    @Transactional
-    @GlobalTransactional
     @Override
-    public Integer testRollback() {
-        User user = new User();
-        user.setEmail("lwx@neu.com");
-        user.setName("lwx");
-        user.setPassword("Neusoft123");
-        int rv = userService.register(user);
-        if(rv == 1){
-            throw new RuntimeException("故意失败");
+    public Integer addBornout(Integer sprintId, Date createDate) {
+        //先查有没有，没有则新建，有则更新加数
+
+        LambdaQueryWrapper<Bornout> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Bornout::getSprintId, sprintId).eq(Bornout::getCreateDate, createDate);
+
+
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String createDateStr = dateFormat.format(createDate);
+
+        Bornout bornout = bornoutMapper.selectBySprintAndDate(sprintId, createDateStr);
+
+        if(bornout == null){
+            bornout = new Bornout();
+            bornout.setSprintId(sprintId);
+            bornout.setCreateDate(createDate);
+            bornout.setFinishedStoryNum(1);
+            return bornoutMapper.insert(bornout);
+        }else{
+            bornout.setFinishedStoryNum(bornout.getFinishedStoryNum() + 1);
+            return bornoutMapper.updateById(bornout);
         }
-        return rv;
+
     }
+
 }

@@ -7,4 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface BornoutMapper extends BaseMapper<Bornout> {
+
+    Bornout selectBySprintAndDate(Integer sprintId, String createDateStr);
+
 }

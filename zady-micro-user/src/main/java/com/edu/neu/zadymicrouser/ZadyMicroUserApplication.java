@@ -18,19 +18,4 @@ public class ZadyMicroUserApplication {
         SpringApplication.run(ZadyMicroUserApplication.class, args);
     }
 
-    @RestController
-    class EchoController {
-        @RequestMapping(value = "user/echo/{string}", method = RequestMethod.GET)
-        public String echo(@PathVariable String string) throws InterruptedException {
-            Thread.sleep(20);
-            return"Hello Nacos Discovery ";
-        }
-
-        @RequestMapping(value = "role/echo/{string}", method = RequestMethod.GET)
-        public String echo2(@PathVariable String string) throws InterruptedException {
-            Thread.sleep(20);
-            return "Hello Nacos Discovery2 " + string;
-        }
-    }
-
 }
