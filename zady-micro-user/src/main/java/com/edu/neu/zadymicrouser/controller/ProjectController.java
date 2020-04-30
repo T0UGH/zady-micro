@@ -19,6 +19,12 @@ public class ProjectController {
     ProjectService projectService;
 
     @Auth(needProject = false)
+    @GetMapping("/project/exist/{projectId}")
+    public Boolean existById(@PathVariable Integer projectId){
+        return projectService.existById(projectId);
+    }
+
+    @Auth(needProject = false)
     @PostMapping("/project")
     public Integer createProject(@RequestBody Project project){
         Integer currUserId = ParamHolder.getCurrentUserId();
@@ -40,6 +46,42 @@ public class ProjectController {
             throw new DefaultException("更改失败");
         }
         return rv;
+    }
+
+    @Auth(sameProject = true, role = {Role.RoleEnum.master})
+    @PutMapping("/project/sprintId")
+    public Integer updateCurrentSprintId(Integer projectId, Integer currentSprintId){
+        if(!ParamHolder.sameProject(projectId)){
+            throw new NoAuthException("无权操作此项目");
+        }
+        return projectService.updateCurrentSprintId(projectId, currentSprintId);
+    }
+
+    @Auth(sameProject = true, role = {Role.RoleEnum.master})
+    @PutMapping("/project/sprintNum")
+    public Integer addSprintNum(Integer projectId){
+        if(!ParamHolder.sameProject(projectId)){
+            throw new NoAuthException("无权操作此项目");
+        }
+        return projectService.addSprintNum(projectId);
+    }
+
+    @Auth(sameProject = true, role = {Role.RoleEnum.master})
+    @PutMapping("/project/springId/springNum")
+    public Integer updateCurrentSprintIdAndAddSprintNum(Integer projectId, Integer currentSprintId){
+        if(!ParamHolder.sameProject(projectId)){
+            throw new NoAuthException("无权操作此项目");
+        }
+        return projectService.updateCurrentSprintIdAndAddSprintNum(projectId, currentSprintId);
+    }
+
+    @Auth(sameProject = true, role = {Role.RoleEnum.master})
+    @PutMapping("/project/springId/null")
+    public Integer updateCurrentSprintIdToNull(Integer projectId){
+        if(!ParamHolder.sameProject(projectId)){
+            throw new NoAuthException("无权操作此项目");
+        }
+        return projectService.updateCurrentSprintIdToNull(projectId);
     }
 
     @Auth(needProject = false)

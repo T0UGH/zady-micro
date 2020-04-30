@@ -33,9 +33,17 @@ public class UserController {
     /**
      * 检测邮箱是否被使用了
      * */
-    @GetMapping("/user/email/{email}")
+    @GetMapping("/user/exist/email/{email}")
     public Boolean existByEmail(@PathVariable String email){
         return userService.existByEmail(email);
+    }
+
+    /**
+     * 检测对应id的用户是否存在
+     * */
+    @GetMapping("/user/exist/{userId}")
+    public Boolean existByUserId(@PathVariable Integer userId){
+        return userService.existById(userId);
     }
 
     /**
@@ -45,6 +53,19 @@ public class UserController {
     @GetMapping("/user/{userId}")
     public User getUser(@PathVariable Integer userId){
         User user =  userService.selectById(userId);
+        if(user == null){
+            throw new NotFoundException("用户不存在");
+        }
+        return user;
+    }
+
+    /**
+     * 根据用户的email读取某个用户的信息
+     * */
+    @Auth(needProject = false)
+    @GetMapping("/user/email/{email}")
+    public User getUserByEmail(@PathVariable String email){
+        User user =  userService.selectByEmail(email);
         if(user == null){
             throw new NotFoundException("用户不存在");
         }

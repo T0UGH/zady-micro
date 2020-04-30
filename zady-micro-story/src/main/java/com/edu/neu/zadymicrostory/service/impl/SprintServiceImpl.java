@@ -1,0 +1,167 @@
+package com.edu.neu.zadymicrostory.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.edu.neu.zadymicrocommon.exception.BadDataException;
+import com.edu.neu.zadymicrocommon.exception.DefaultException;
+import com.edu.neu.zadymicrocommon.exception.NoAuthException;
+import com.edu.neu.zadymicrostory.mapper.SprintMapper;
+import com.edu.neu.zadymicrocommon.pojo.Project;
+import com.edu.neu.zadymicrocommon.pojo.Sprint;
+import com.edu.neu.zadymicrostory.feign.DashBoardService;
+import com.edu.neu.zadymicrostory.feign.ProjectService;
+import com.edu.neu.zadymicrostory.service.SprintService;
+import com.edu.neu.zadymicrocommon.util.ParamHolder;
+import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
+
+@Transactional
+@Service
+public class SprintServiceImpl implements SprintService {
+
+    @Resource
+    SprintMapper sprintMapper;
+
+    @Resource
+    ProjectService projectService;
+
+    @Resource
+    DashBoardService dashBoardService;
+
+
+    @Override
+    public Sprint selectById(Integer sprintId) {
+        return sprintMapper.selectById(sprintId);
+    }
+
+    @Override
+    public Boolean existById(Integer sprintId) {
+        LambdaQueryWrapper<Sprint> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.select(Sprint::getSprintId).eq(Sprint::getSprintId, sprintId);
+        return sprintMapper.selectOne(lambdaQueryWrapper) != null;
+    }
+
+    @GlobalTransactional
+    @Override
+    public List<Sprint> selectByProjectId(Integer projectId) {
+        if(!projectService.existById(projectId)){
+            throw new BadDataException("对应项目不存在");
+        }
+
+        LambdaQueryWrapper<Sprint> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Sprint::getProjectId, projectId);
+        return sprintMapper.selectList(lambdaQueryWrapper);
+    }
+
+    @GlobalTransactional
+    @Override
+    public Sprint selectCurrentByProjectId(Integer projectId) {
+
+        Project project = projectService.selectById(projectId);
+
+        if(project == null){
+            throw new BadDataException("对应项目不存在");
+        }
+
+        Integer currentSprintId = project.getCurrentSprintId();
+
+        return sprintMapper.selectById(currentSprintId);
+    }
+
+    @GlobalTransactional
+    @Override
+    public Integer start(Sprint sprint) {
+
+        Project project;
+
+        //检测project外键约束
+        if(sprint.getProjectId() == null || (project = projectService.selectById(sprint.getProjectId())) == null){
+            throw new BadDataException("对应项目不存在，请修改项目Id字段");
+        }
+
+        //检测是否和当前登陆是同一个project，不是的话无权
+        if(!ParamHolder.sameProject(sprint.getProjectId())){
+            throw new NoAuthException("无给定project[" + sprint.getProjectId() + "]操作权限");
+        }
+
+        //若project有currentSprintId，说明有sprint进行中，则报错，
+        if(project.getCurrentSprintId()  != null){
+            throw new BadDataException("有进行中的sprint,请先结束再创建");
+        }
+
+        //设置为进行中
+        sprint.setStatus(Sprint.Status.进行中);
+
+        //设置开始日期为今天
+        sprint.setStartDate(new Date());
+
+        //设置轮数为project.sprintNum + 1
+        sprint.setRoundId(project.getSprintNum() + 1);
+
+        int rv = sprintMapper.insert(sprint);
+
+        //更新project的currentSprintId为它
+        if(projectService.updateCurrentSprintIdAndAddSprintNum(sprint.getProjectId(), sprint.getSprintId()) == 0){
+            throw new DefaultException("服务器内部错误，无法更新当前sprint");
+        }
+
+        if(dashBoardService.insert(sprint.getSprintId()) == 0){
+            throw new DefaultException("服务器内部错误，无法创建当前sprint[" + sprint.getSprintId() + "]对应的dashBoard");
+        }
+
+        return rv;
+    }
+
+    @Override
+    public Integer update(Sprint sprint) {
+
+        Sprint dbSprint = sprintMapper.selectById(sprint.getSprintId());
+
+        if(dbSprint == null){
+            throw new BadDataException("给定sprint[" + sprint.getSprintId() + "]不存在");
+        }
+
+        if(!ParamHolder.sameProject(dbSprint.getProjectId())){
+            throw new NoAuthException("无给定project[" + sprint.getProjectId() + "]操作权限");
+        }
+
+        Sprint updateSprint = new Sprint();
+        updateSprint.setSprintId(sprint.getSprintId());
+        updateSprint.setName(sprint.getName());
+        updateSprint.setNote(sprint.getNote());
+        updateSprint.setExpectedEndDate(sprint.getExpectedEndDate());
+        return sprintMapper.updateById(updateSprint);
+    }
+
+    @GlobalTransactional
+    @Override
+    public Integer end(Integer sprintId) {
+        //先查，并判空
+        Sprint sprint;
+        if((sprint = sprintMapper.selectById(sprintId)) == null){
+            throw new BadDataException("该sprint" + sprintId + "并不存在");
+        }
+
+        if(!ParamHolder.sameProject(sprint.getProjectId())){
+            throw new NoAuthException("无给定project[" + sprint.getProjectId() + "]操作权限");
+        }
+
+        //然后判断状态
+        if(sprint.getStatus() == null || sprint.getStatus() != Sprint.Status.进行中){
+            throw new BadDataException("该sprint: " + sprintId + "状态非法，不能正常结束");
+        }
+
+        //然后更新为已结束，并设置结束时间
+        sprint.setStatus(Sprint.Status.已完成);
+        sprint.setActualEndDate(new Date());
+        sprintMapper.updateById(sprint);
+
+        //然后更新projectId的一些字段
+        return projectService.updateCurrentSprintIdToNull(sprint.getProjectId());
+
+    }
+}

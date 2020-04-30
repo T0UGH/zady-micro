@@ -92,6 +92,16 @@ public class RoleController {
         return role;
     }
 
+    @GetMapping("/role/id/{roleId}")
+    @Auth(needProject = false)
+    public Role getRole(@PathVariable Integer roleId){
+        Role role = roleService.selectById(roleId);
+        if(role == null){
+            throw new NotFoundException("获取失败");
+        }
+        return role;
+    }
+
     @GetMapping("/user/projects/{userId}")
     @Auth(needProject = false)
     public List<Project> getProjectsByUser(@PathVariable Integer userId){
